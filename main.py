@@ -22,20 +22,27 @@ state=numpy.array([200,100,0,000])
 i=0
 
 while 1:
-    for event in pygame.event.get():
-         if event.type == pygame.QUIT: sys.exit()
+	for event in pygame.event.get():
+    		if event.type == pygame.QUIT: sys.exit()
+    		if event.type == pygame.KEYDOWN:
+        			if event.key == pygame.K_LEFT:
+            				i -= 0.01
+        			if event.key == pygame.K_RIGHT:
+            				i += 0.01
+    	
+    	i=i+0.01
+	b=0
+	if (state[1]>250):
+    		b=250-state[1]
+	vehicle, rect = truck.get_vehicle(state[0],state[1],0,b,b)
 
-    i=i+0.005
+	print solver.system.get_positions()
 
-    b=0
-    if (state[1]>250):
-    	b=250-state[1]
-    vehicle, rect = truck.get_vehicle(state[0],state[1],0,b,b)
-    state = solver.solve_step(state)
-    screen.fill(azur_sky)
-    pygame.draw.rect(screen,wine,(0,340,920,200),0)
-    screen.blit(vehicle, rect)
+    	state = solver.solve_step(state)
+    	screen.fill(azur_sky)
+    	pygame.draw.rect(screen,wine,(0,340,920,200),0)
+    	screen.blit(vehicle, rect)
     
     #screen.blit(wheel, wheel.get_rect().move(300+50*math.cos(3.14/180*i)),300+50*math.cos(3.14/180*i)))
 
-    pygame.display.flip()
+    	pygame.display.flip()
