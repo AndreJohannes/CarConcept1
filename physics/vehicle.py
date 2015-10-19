@@ -60,11 +60,13 @@ class Vehicle:
 		position_wheel_rear_y = position_y + cos*self.CM_to_wheel_rear[1] - sin*self.CM_to_wheel_rear[0]
 		force_front = 5*(ground-position_wheel_front_y) if position_wheel_front_y > ground else 0 
 		force_rear = 5*(ground-position_wheel_rear_y) if position_wheel_rear_y > ground else 0
-		force_g = 5 
-		force_friction = -0.1*velocity_y
+		force_g = 5
+		force_friction = -(0.1 + (0.2 if  position_wheel_front_y > ground else 0) +(0.2 if position_wheel_rear_y > ground else 0))*velocity_y 
 		force_y = force_g+force_friction+force_front+force_rear
+		force_x = 15 if (position_wheel_rear_y > ground) else 0.0
 		torque =  \
-			force_front*(cos*self.CM_to_wheel_front[1]+sin*self.CM_to_wheel_front[0]) + \
-			force_rear*(cos*self.CM_to_wheel_rear[1]+sin*self.CM_to_wheel_rear[0]) 
+			force_front*(-cos*self.CM_to_wheel_front[1]+sin*self.CM_to_wheel_front[0]) + \
+			(force_rear+force_x)*(cos*self.CM_to_wheel_rear[1]-sin*self.CM_to_wheel_rear[0]) 
+	 
 
-		return numpy.array([velocity_x, velocity_y, 0, force_y, angular_velocity , 0.00001*torque])
+		return numpy.array([velocity_x, velocity_y, force_x, force_y, angular_velocity , 0.00003*torque-0.08*angular_velocity])

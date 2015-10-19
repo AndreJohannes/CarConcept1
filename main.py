@@ -17,7 +17,7 @@ wheel = pygame.image.load("resources/wheel.png").convert_alpha()
 truck = truck.Truck(pygame)
 solver = runge_kutta_solver.Solver(0.03, vehicle.Vehicle())
 
-state=numpy.array([200,100,0,0,-1.0,0])
+state=numpy.array([200,200,0,0,0.01,0])
 
 i=0
 
@@ -37,7 +37,5 @@ while 1:
     	screen.fill(azur_sky)
     	pygame.draw.rect(screen,wine,(0,340,920,200),0)
     	screen.blit(vehicle, rect)
-    
-    #screen.blit(wheel, wheel.get_rect().move(300+50*math.cos(3.14/180*i)),300+50*math.cos(3.14/180*i)))
 
     	pygame.display.flip()
