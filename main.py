@@ -17,7 +17,7 @@ wheel = pygame.image.load("resources/wheel.png").convert_alpha()
 truck = truck.Truck(pygame)
 solver = runge_kutta_solver.Solver(0.03, vehicle.Vehicle())
 
-state=numpy.array([200,100,0,000])
+state=numpy.array([200,100,0,0,-1.0,0])
 
 i=0
 
@@ -27,17 +27,12 @@ while 1:
     		if event.type == pygame.KEYDOWN:
         			if event.key == pygame.K_LEFT:
             				i -= 0.01
+
         			if event.key == pygame.K_RIGHT:
             				i += 0.01
-    	
-    	i=i+0.01
-	b=0
-	if (state[1]>250):
-    		b=250-state[1]
-	vehicle, rect = truck.get_vehicle(state[0],state[1],0,b,b)
 
-	print solver.system.get_positions()
-
+	suspension_front, suspension_rear = solver.system.get_suspensions(state)    	
+	vehicle, rect = truck.get_vehicle(state[0],state[1],state[4],suspension_front, suspension_rear)
     	state = solver.solve_step(state)
     	screen.fill(azur_sky)
     	pygame.draw.rect(screen,wine,(0,340,920,200),0)
