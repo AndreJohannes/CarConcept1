@@ -3,6 +3,7 @@ import math,numpy
 class Vehicle:
 
 	def __init__(self):
+		self.throttle = 0
 		# car geometry, should be stored somewhere else eventually
 		# currently the centre of the car is at  98/58; the size of the entire car is (196,116)
 		self.center_of_mass = [0, 0] # This is the center of mass with respect to the geometrical centre of the vehicle
@@ -63,10 +64,13 @@ class Vehicle:
 		force_g = 5
 		force_friction = -(0.1 + (0.2 if  position_wheel_front_y > ground else 0) +(0.2 if position_wheel_rear_y > ground else 0))*velocity_y 
 		force_y = force_g+force_friction+force_front+force_rear
-		force_x = 15 if (position_wheel_rear_y > ground) else 0.0
+		force_x = (self.throttle -0.1*velocity_x)  if (position_wheel_rear_y +10 > ground) else -0.1*velocity_x
 		torque =  \
 			force_front*(-cos*self.CM_to_wheel_front[1]+sin*self.CM_to_wheel_front[0]) + \
 			(force_rear+force_x)*(cos*self.CM_to_wheel_rear[1]-sin*self.CM_to_wheel_rear[0]) 
 	 
 
 		return numpy.array([velocity_x, velocity_y, force_x, force_y, angular_velocity , 0.00003*torque-0.08*angular_velocity])
+
+	def set_throttle(self, throttle):
+		self.throttle = throttle;

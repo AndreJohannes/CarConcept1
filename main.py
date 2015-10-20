@@ -19,20 +19,20 @@ solver = runge_kutta_solver.Solver(0.03, vehicle.Vehicle())
 
 state=numpy.array([200,200,0,0,0.01,0])
 
-i=0
+
 
 while 1:
 	for event in pygame.event.get():
-    		if event.type == pygame.QUIT: sys.exit()
-    		if event.type == pygame.KEYDOWN:
-        			if event.key == pygame.K_LEFT:
-            				i -= 0.01
-
-        			if event.key == pygame.K_RIGHT:
-            				i += 0.01
+		if event.type == pygame.QUIT: sys.exit()
+		if event.type == pygame.KEYDOWN:
+			if event.key == pygame.K_RIGHT:solver.system.set_throttle(20)
+			if event.key == pygame.K_LEFT:solver.system.set_throttle(-10)
+		if event.type == pygame.KEYUP:
+            			if event.key == pygame.K_RIGHT:solver.system.set_throttle(0)
+            			if event.key == pygame.K_LEFT:solver.system.set_throttle(0)
 
 	suspension_front, suspension_rear = solver.system.get_suspensions(state)    	
-	vehicle, rect = truck.get_vehicle(state[0],state[1],state[4],suspension_front, suspension_rear)
+	vehicle, rect = truck.get_vehicle(state[0] %1000,state[1],state[4],suspension_front, suspension_rear)
     	state = solver.solve_step(state)
     	screen.fill(azur_sky)
     	pygame.draw.rect(screen,wine,(0,340,920,200),0)
