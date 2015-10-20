@@ -1,8 +1,10 @@
-import math,numpy
+import math, numpy
+import pdb
 
 class Vehicle:
 
-	def __init__(self):
+	def __init__(self, objects):
+		self.objects = objects
 		self.throttle = 0
 		# car geometry, should be stored somewhere else eventually
 		# currently the centre of the car is at  98/58; the size of the entire car is (196,116)
@@ -46,27 +48,41 @@ class Vehicle:
 		return [dist_front_x, dist_front_y],[dist_rear_x, dist_rear_y]
 
 	def get_function(self, state):
-		ground = 300
-		position_x = state[0]
-		position_y = state[1]
-		velocity_x = state[2]
-		velocity_y = state[3]
-		rad = state[4]
-		angular_velocity = state[5]
-		sin = math.sin(rad);
-		cos = math.cos(rad);
-		#position_wheel_front_x = position_x + cos*self.CM_to_wheel_front[0] + sin*self.CM_to_wheel_front[1]
+		position_x = state[0]; position_y = state[1]
+		velocity_x = state[2]; velocity_y = state[3]
+		rad = state[4]; angular_velocity = state[5]
+		sin = math.sin(rad); cos = math.cos(rad);
+		# Next we calculate the position of the centers of the front and rear wheel
+		position_wheel_front_x = position_x + cos*self.CM_to_wheel_front[0] + sin*self.CM_to_wheel_front[1]
 		position_wheel_front_y = position_y + cos*self.CM_to_wheel_front[1] - sin*self.CM_to_wheel_front[0]
-		#position_wheel_rear_x = position_x + cos*self.CM_to_wheel_rear[0] + sin*self.CM_to_wheel_rear[1]
+		position_wheel_rear_x = position_x + cos*self.CM_to_wheel_rear[0] + sin*self.CM_to_wheel_rear[1]
 		position_wheel_rear_y = position_y + cos*self.CM_to_wheel_rear[1] - sin*self.CM_to_wheel_rear[0]
-		force_front = 5*(ground-position_wheel_front_y) if position_wheel_front_y > ground else 0 
-		force_rear = 5*(ground-position_wheel_rear_y) if position_wheel_rear_y > ground else 0
-		force_g = 5
+		
+		objects_front = self.objects.get_objects(position_wheel_front_x, position_wheel_front_y)
+		objects_rear = self.objects.get_objects(position_wheel_rear_x, position_wheel_rear_y)
+		
+		force_front_x=0; force_font_y=0; touch_front = False; 
+		for object_front in objects_front:
+			ext = object_front[0]
+			n = object_front[1]
+			touch_front = True
+			force_front_x += 5 * ext * n[0]
+			force_front_y += 5 * ext * n[1] 
+		force_rear_x=0; force_front_y=0; touch_rear = False;
+		for object_rear in objects_rear
+			ext = object_rear[0]
+			n = objects_rear[1]
+			touch_rear = True
+			force_rear_x += 5 * ext *n[0]
+			force_rear_y += 5 * ext *n[1]
+
+		force_g =  5 # add g-force
 		force_friction = -(0.1 + (0.2 if  position_wheel_front_y > ground else 0) +(0.2 if position_wheel_rear_y > ground else 0))*velocity_y 
-		force_y = force_g+force_friction+force_front+force_rear
-		force_x = (self.throttle -0.1*velocity_x)  if (position_wheel_rear_y +10 > ground) else -0.1*velocity_x
+		force_y = force_g+force_front_x+force_rear_x
+		force_x = force_front_y + force_rear_y
+		force_x += (self.throttle -0.1*velocity_x)  if (position_wheel_rear_y +10 > ground) else -0.1*velocity_x
 		torque =  \
-			force_front*(-cos*self.CM_to_wheel_front[1]+sin*self.CM_to_wheel_front[0]) + \
+			force_front_x*(-cos*self.CM_to_wheel_front[1]+sin*self.CM_to_wheel_front[0]) + \
 			(force_rear+force_x)*(cos*self.CM_to_wheel_rear[1]-sin*self.CM_to_wheel_rear[0]) 
 	 
 

@@ -2,6 +2,7 @@ import sys, pygame,math,numpy
 from graphics import truck
 from physics import  runge_kutta_solver
 from physics import vehicle 
+from physics import objects
 
 pygame.init()
  
@@ -15,7 +16,9 @@ transparent = 0,0,0,0
 screen = pygame.display.set_mode(size)
 wheel = pygame.image.load("resources/wheel.png").convert_alpha()
 truck = truck.Truck(pygame)
-solver = runge_kutta_solver.Solver(0.03, vehicle.Vehicle())
+objects = objects.Objects()
+vehicle = vehicle.Vehicle(objects)
+solver = runge_kutta_solver.Solver(0.03, vehicle)
 
 state=numpy.array([200,200,0,0,0.01,0])
 
@@ -32,10 +35,10 @@ while 1:
             			if event.key == pygame.K_LEFT:solver.system.set_throttle(0)
 
 	suspension_front, suspension_rear = solver.system.get_suspensions(state)    	
-	vehicle, rect = truck.get_vehicle(state[0] %1000,state[1],state[4],suspension_front, suspension_rear)
+	vehicle_image, vehicle_rect = truck.get_vehicle(state[0] %1000,state[1],state[4],suspension_front, suspension_rear)
     	state = solver.solve_step(state)
     	screen.fill(azur_sky)
     	pygame.draw.rect(screen,wine,(0,340,920,200),0)
-    	screen.blit(vehicle, rect)
+    	screen.blit(vehicle_image, vehicle_rect)
 
     	pygame.display.flip()
