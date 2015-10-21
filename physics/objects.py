@@ -5,16 +5,19 @@ from collections import namedtuple
 
 class Objects:
 
+	# Class that represents the objects of bars, ie. plane grounds
 	class Bar(object):
 
 		def __init__(self, A, B):
 			self.A = A # A and B are the end points of the bar
 			self.B = B
 			AB = B - A
+			self.tangent = AB / numpy.linalg.norm(AB)
 			rot = numpy.array([[0,1],[-1,0]])
-			self.n = numpy.dot(rot, (AB) / numpy.linalg.norm(AB));n = self.n # vector perpendicular to the bar
+			self.n = numpy.dot(rot, (AB) / numpy.linalg.norm(AB)); n = self.n # vector perpendicular to the bar
 			self.denominator =  (AB[1]*n[0]-AB[0]*n[1])
 
+	# Class that represents the object of  point, i.e a corner. 	
 	class Point(object):
 
 		def __init__(self, A):
@@ -25,7 +28,11 @@ class Objects:
 		bar_list = []
 		point_list = []
 		self.bar_list = bar_list
-		bar_list.append( Objects.Bar(numpy.array([0,290]),numpy.array([900,290])) )
+		# TODO: the world objects maybe should be loaded from tha xml file
+		bar_list.append( Objects.Bar(numpy.array([-500,430]),numpy.array([1500, 430])) )
+		bar_list.append( Objects.Bar(numpy.array([200,430]),numpy.array([600, 290])) )
+		bar_list.append( Objects.Bar(numpy.array([600, 290]), numpy.array([800,430])) )
+		point_list.append( Objects.Point(numpy.array([600,290])))
 		self.point_list = point_list
 
 	def get_objects(self, Cx, Cy):
@@ -42,6 +49,9 @@ class Objects:
 					object_list.append([x, n])
 
 		return object_list
+
+	def get_bars(self):
+		return self.bar_list
 
 	def _get_bar(self, bar, Cx, Cy):
 		A = bar.A; n = bar.n

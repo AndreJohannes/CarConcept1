@@ -8,7 +8,7 @@ class Vehicle:
 		self.throttle = 0
 		# car geometry, should be stored somewhere else eventually
 		# currently the centre of the car is at  98/58; the size of the entire car is (196,116)
-		self.center_of_mass = [0, 0] # This is the center of mass with respect to the geometrical centre of the vehicle
+		self.center_of_mass = [0, 10] # This is the center of mass with respect to the geometrical centre of the vehicle
 		self.position_wheel_rear = [-46,24] # This is the positions with respect to the geometrical centre 
 		self.position_wheel_front = [59,24]  # This is the positions with respect to the geometrical centre
 		self.CM_to_wheel_front = [self.position_wheel_front[0]-self.center_of_mass[0], self.position_wheel_front[1]-self.center_of_mass[1]] 	
@@ -28,24 +28,13 @@ class Vehicle:
 			[self.position[0]+cos*front_x+sin*front_y, self.position[1]+cos*front_y-sin*front_x], \
 			[self.position[0]+cos*rear_x+sin*rear_y, self.position[1]+cos*rear_y-sin*rear_x]
 
-	def get_suspensions(self, state):
-		ground = 300
-		position_x = state[0]
-		position_y = state[1]
-		rad = state[4]
-		sin = math.sin(rad);
-		cos = math.cos(rad);
-		#position_wheel_front_x = position_x + cos*self.CM_to_wheel_front[0] + sin*self.CM_to_wheel_front[1]
-		position_wheel_front_y = position_y + cos*self.CM_to_wheel_front[1] - sin*self.CM_to_wheel_front[0]
-		#position_wheel_rear_x = position_x + cos*self.CM_to_wheel_rear[0] + sin*self.CM_to_wheel_rear[1]
-		position_wheel_rear_y = position_y + cos*self.CM_to_wheel_rear[1] - sin*self.CM_to_wheel_rear[0]
-		dist_front = (ground-position_wheel_front_y) if position_wheel_front_y > ground else 0 
-		dist_rear = (ground-position_wheel_rear_y) if position_wheel_rear_y > ground else 0
-		dist_front_x = -sin * dist_front
-		dist_front_y = cos *dist_front
-		dist_rear_x = -sin * dist_rear 
-		dist_rear_y = cos * dist_rear 
-		return [dist_front_x, dist_front_y],[dist_rear_x, dist_rear_y]
+	def get_displacements(self, state, displacements):
+		rad = state[4]; sin = math.sin(rad); cos = math.cos(rad);
+		displacement_front_x = cos * displacements[0] - sin * displacements[1]
+		displacement_front_y = cos  * displacements[1] + sin * displacements[0]
+		displacement_rear_x = cos *displacements[2] - sin * displacements[3]
+		displacement_rear_y = cos * displacements[3] + sin * displacements[2]
+		return [displacement_front_x, displacement_front_y], [displacement_rear_x, displacement_rear_y]
 
 	def get_function(self, state):
 		position_x = state[0]; position_y = state[1]
@@ -61,32 +50,37 @@ class Vehicle:
 		objects_front = self.objects.get_objects(position_wheel_front_x, position_wheel_front_y)
 		objects_rear = self.objects.get_objects(position_wheel_rear_x, position_wheel_rear_y)
 		
-		force_front_x=0; force_font_y=0; touch_front = False; 
+		force_front_x=0; force_front_y=0; touch_front = False; 
+		displacement_front_x = 0; displacement_front_y = 0;
 		for object_front in objects_front:
-			ext = object_front[0]
-			n = object_front[1]
-			touch_front = True
-			force_front_x += 5 * ext * n[0]
-			force_front_y += 5 * ext * n[1] 
-		force_rear_x=0; force_front_y=0; touch_rear = False;
-		for object_rear in objects_rear
-			ext = object_rear[0]
-			n = objects_rear[1]
-			touch_rear = True
-			force_rear_x += 5 * ext *n[0]
-			force_rear_y += 5 * ext *n[1]
+			ext = object_front[0]; n = object_front[1]; touch_front = True
+			force_front_x += 25 * ext * n[0] - self.throttle * n[1]
+			force_front_y += 25 * ext * n[1] + self.throttle * n[0]
+			displacement_front_x = 26 * ext * n[0] # TODO: this needs to be corrected
+			displacement_front_y = 26 * ext * n[1]
 
-		force_g =  5 # add g-force
-		force_friction = -(0.1 + (0.2 if  position_wheel_front_y > ground else 0) +(0.2 if position_wheel_rear_y > ground else 0))*velocity_y 
-		force_y = force_g+force_front_x+force_rear_x
-		force_x = force_front_y + force_rear_y
-		force_x += (self.throttle -0.1*velocity_x)  if (position_wheel_rear_y +10 > ground) else -0.1*velocity_x
-		torque =  \
-			force_front_x*(-cos*self.CM_to_wheel_front[1]+sin*self.CM_to_wheel_front[0]) + \
-			(force_rear+force_x)*(cos*self.CM_to_wheel_rear[1]-sin*self.CM_to_wheel_rear[0]) 
-	 
+		force_rear_x=0; force_rear_y= 0; touch_rear = False;
+		displacement_rear_x = 0; displacement_rear_y = 0;
+		for object_rear in objects_rear:
+			ext = object_rear[0]; n = object_rear[1]; touch_rear = True
+			force_rear_x += 25 * ext *n[0] - self.throttle * n[1] 
+			force_rear_y += 25 * ext *n[1] + self.throttle * n[0]
+			displacement_rear_x =  26 * ext * n[0] # TODO: this needs to be corrected
+			displacement_rear_y =  26 * ext * n[1]
 
-		return numpy.array([velocity_x, velocity_y, force_x, force_y, angular_velocity , 0.00003*torque-0.08*angular_velocity])
+		force_g =  5 # add g-force   ##### TODO:: put all the constants into a seperate file or something like that
+		friction =  0.1 + 0.2 * touch_front + 0.2 * touch_rear
+		force_x = force_front_x + force_rear_x - friction* velocity_x
+		force_y = force_g+force_front_y+force_rear_y - friction * velocity_y 
+		torque = force_front_x * (cos * self.CM_to_wheel_front[1] - sin * self.CM_to_wheel_front[0]) + \
+			force_front_y * (-cos * self.CM_to_wheel_front[0] - sin * self.CM_to_wheel_front[1]) + \
+			force_rear_x * (cos * self.CM_to_wheel_rear[1] - sin * self.CM_to_wheel_rear[0]) + \
+			force_rear_y * (-cos * self.CM_to_wheel_rear[0] - sin * self.CM_to_wheel_rear[1])
+
+		return   numpy.array([velocity_x, velocity_y, force_x, force_y, \
+				angular_velocity , 0.0003*torque-0.08*angular_velocity]), \
+			numpy.array([displacement_front_x, displacement_front_y, \
+				displacement_rear_x, displacement_rear_y])
 
 	def set_throttle(self, throttle):
 		self.throttle = throttle;
