@@ -53,6 +53,6 @@ while 1:
 
     	i = i + 1
     	if(time.time()-start > 1):
-    		print i, time.time()-start
+    		print "FPS: ",i/(time.time()-start)
     		start=time.time()
     		i = 0
