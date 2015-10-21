@@ -35,16 +35,16 @@ class Objects:
 		point_list.append( Objects.Point(numpy.array([600,290])))
 		self.point_list = point_list
 
-	def get_objects(self, Cx, Cy):
+	def get_objects(self, Cx, Cy, distance_threshold):
 		object_list = []
 		for bar  in self.bar_list:
-			x, y, n = self._get_bar(bar, Cx, Cy)
+			x, y, n = self._get_bar(bar, Cx, Cy, distance_threshold)
 			if x is not None:
 				object_list.append([y, n]) 		
 
 		if(not object_list):
 			for point in self.point_list:
-				x, n = self._get_point(point, Cx, Cy)
+				x, n = self._get_point(point, Cx, Cy, distance_threshold)
 				if x is not None:
 					object_list.append([x, n])
 
@@ -53,7 +53,7 @@ class Objects:
 	def get_bars(self):
 		return self.bar_list
 
-	def _get_bar(self, bar, Cx, Cy):
+	def _get_bar(self, bar, Cx, Cy, distance_threshold):
 		A = bar.A; n = bar.n
 		AC = [Cx - A[0], Cy - A[1]]
 		numerator = AC[1] * n[0] - AC[0] * n[1]
@@ -63,15 +63,15 @@ class Objects:
 		AB = bar.A-bar.B	
 		numerator = AC[1] *AB[0] - AC[0] * AB[1] 
 		y = numerator / bar.denominator
-		if (y<0 or y> 26): # TODO: define the 26 globally
+		if (y<0 or y> distance_threshold): 
 			return  None, None, None
-		y = (26 - y) / 26
+		y = (distance_threshold- y) / distance_threshold
 		return  x, y, bar.n
 
-	def _get_point(self, point, Cx, Cy):
+	def _get_point(self, point, Cx, Cy, distance_threshold):
 		A = point.A
 		dist_sqr = (Cx-A[0])*(Cx-A[0]) + (Cy-A[1])*(Cy-A[1])
-		if (dist_sqr > 26*26): # define the 26 globally
+		if (dist_sqr > distance_threshold * distance_threshold): 
 			return None, None
 		n = numpy.array([Cx-A[0],Cy-A[1]]); n = n / numpy.linalg.norm(n)
-		return  (26-math.sqrt(dist_sqr))/26, n
+		return  (distance_threshold - math.sqrt(dist_sqr)) / distance_threshold, n

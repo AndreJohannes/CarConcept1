@@ -8,7 +8,8 @@ class Vehicle:
 		self.throttle = 0
 		# car geometry, should be stored somewhere else eventually
 		# currently the centre of the car is at  98/58; the size of the entire car is (196,116)
-		self.center_of_mass = [0, 10] # This is the center of mass with respect to the geometrical centre of the vehicle
+		self.center_geometric =[98, 58]
+		self.center_of_mass = [20, 20] # This is the center of mass with respect to the geometrical centre of the vehicle
 		self.position_wheel_rear = [-46,24] # This is the positions with respect to the geometrical centre 
 		self.position_wheel_front = [59,24]  # This is the positions with respect to the geometrical centre
 		self.CM_to_wheel_front = [self.position_wheel_front[0]-self.center_of_mass[0], self.position_wheel_front[1]-self.center_of_mass[1]] 	
@@ -47,26 +48,30 @@ class Vehicle:
 		position_wheel_rear_x = position_x + cos*self.CM_to_wheel_rear[0] + sin*self.CM_to_wheel_rear[1]
 		position_wheel_rear_y = position_y + cos*self.CM_to_wheel_rear[1] - sin*self.CM_to_wheel_rear[0]
 		
-		objects_front = self.objects.get_objects(position_wheel_front_x, position_wheel_front_y)
-		objects_rear = self.objects.get_objects(position_wheel_rear_x, position_wheel_rear_y)
+		objects_front = self.objects.get_objects(position_wheel_front_x, position_wheel_front_y, 26)
+		objects_rear = self.objects.get_objects(position_wheel_rear_x, position_wheel_rear_y, 26)
 		
 		force_front_x=0; force_front_y=0; touch_front = False; 
 		displacement_front_x = 0; displacement_front_y = 0;
+		velocity_wheel_front = 3*(velocity_x+velocity_y) / 1.4;
 		for object_front in objects_front:
 			ext = object_front[0]; n = object_front[1]; touch_front = True
 			force_front_x += 25 * ext * n[0] - self.throttle * n[1]
 			force_front_y += 25 * ext * n[1] + self.throttle * n[0]
 			displacement_front_x = 26 * ext * n[0] # TODO: this needs to be corrected
 			displacement_front_y = 26 * ext * n[1]
+			velocity_wheel_front = 5*(-n[1] * velocity_x + n[0] * velocity_y)
 
 		force_rear_x=0; force_rear_y= 0; touch_rear = False;
 		displacement_rear_x = 0; displacement_rear_y = 0;
+		velocity_wheel_rear = 3*(velocity_x+velocity_y) / 1.4;
 		for object_rear in objects_rear:
 			ext = object_rear[0]; n = object_rear[1]; touch_rear = True
 			force_rear_x += 25 * ext *n[0] - self.throttle * n[1] 
 			force_rear_y += 25 * ext *n[1] + self.throttle * n[0]
 			displacement_rear_x =  26 * ext * n[0] # TODO: this needs to be corrected
 			displacement_rear_y =  26 * ext * n[1]
+			velocity_wheel_rear = 5*(-n[1] * velocity_x + n[0] * velocity_y)
 
 		force_g =  5 # add g-force   ##### TODO:: put all the constants into a seperate file or something like that
 		friction =  0.1 + 0.2 * touch_front + 0.2 * touch_rear
@@ -78,7 +83,8 @@ class Vehicle:
 			force_rear_y * (-cos * self.CM_to_wheel_rear[0] - sin * self.CM_to_wheel_rear[1])
 
 		return   numpy.array([velocity_x, velocity_y, force_x, force_y, \
-				angular_velocity , 0.0003*torque-0.08*angular_velocity]), \
+				angular_velocity , 0.0003*torque-0.08*angular_velocity,\
+				velocity_wheel_front, velocity_wheel_rear]), \
 			numpy.array([displacement_front_x, displacement_front_y, \
 				displacement_rear_x, displacement_rear_y])
 
