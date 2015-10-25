@@ -49,7 +49,7 @@ class Objects:
 					object_list.append([x, n])
 
 		return object_list
-
+		
 	def get_bars(self):
 		return self.bar_list
 

@@ -24,7 +24,7 @@ class Truck:
 		offset1 = self.vehicle_data.center_geometric[0] + self.vehicle_data.position_wheel_rear[0] -1
 		offset2 = self.vehicle_data.center_geometric[1] + self.vehicle_data.position_wheel_rear[1] -1
 		self.vehicle.blit(wheel_rotated, wheel_rotated.get_rect().\
-			move(offset1+ pos_suspension_rear[0] -center_x, offset2+ pos_suspension_rear[1]-center_y))
+			move(offset1 + pos_suspension_rear[0] -center_x, offset2+ pos_suspension_rear[1]-center_y))
 		wheel_rotated = self.pygame.transform.rotate(self.wheel, -angle_wheel_rear)
 		center_x = wheel_rotated.get_rect().centerx
 		center_y = wheel_rotated.get_rect().centery
