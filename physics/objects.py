@@ -17,23 +17,33 @@ class Objects:
 			self.n = numpy.dot(rot, (AB) / numpy.linalg.norm(AB)); n = self.n # vector perpendicular to the bar
 			self.denominator =  (AB[1]*n[0]-AB[0]*n[1])
 
-	# Class that represents the object of  point, i.e a corner. 	
+	# Class that represents the object of point, i.e a corner. 	
 	class Point(object):
 
 		def __init__(self, A):
 			self.A = A
 
 	
-	def __init__(self):
+	def __init__(self, pygame):
 		bar_list = []
 		point_list = []
 		self.bar_list = bar_list
+		self.pygame = pygame 
 		# TODO: the world objects maybe should be loaded from tha xml file
-		bar_list.append( Objects.Bar(numpy.array([-500,430]),numpy.array([1500, 430])) )
-		bar_list.append( Objects.Bar(numpy.array([200,430]),numpy.array([600, 290])) )
-		bar_list.append( Objects.Bar(numpy.array([600, 290]), numpy.array([800,430])) )
-		point_list.append( Objects.Point(numpy.array([600,290])))
+		bar_list.append( Objects.Bar(numpy.array([-500,430]),numpy.array([1200, 430])) )
+		bar_list.append( Objects.Bar(numpy.array([1200, 430]), numpy.array([1300,385])) )
+		bar_list.append( Objects.Bar(numpy.array([1700, 385]), numpy.array([1800,430])) )
+		bar_list.append( Objects.Bar(numpy.array([1800, 430]), numpy.array([3000,430])) )
+		
 		self.point_list = point_list
+
+	def draw(self, screen, offset_x):
+		wine = 114, 47, 55
+		pygame = self.pygame
+		bars = self.bar_list;
+    		for bar in bars:
+    			pygame.draw.line(screen, wine, bar.A - numpy.array([-400+offset_x,0]), bar.B - numpy.array([-400+offset_x,0]), 5)
+
 
 	def get_objects(self, Cx, Cy, distance_threshold):
 		object_list = []
@@ -49,9 +59,6 @@ class Objects:
 					object_list.append([x, n])
 
 		return object_list
-		
-	def get_bars(self):
-		return self.bar_list
 
 	def _get_bar(self, bar, Cx, Cy, distance_threshold):
 		A = bar.A; n = bar.n
