@@ -1,3 +1,5 @@
 Idea for the game:
 
 make a comic mode: fast motion type of thing
+make a wire frame version
+make a version where there are coffins in the ground

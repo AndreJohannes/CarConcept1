@@ -32,8 +32,8 @@ class Objects:
 		# TODO: the world objects maybe should be loaded from tha xml file
 		bar_list.append( Objects.Bar(numpy.array([-500,430]),numpy.array([1200, 430])) )
 		bar_list.append( Objects.Bar(numpy.array([1200, 430]), numpy.array([1300,385])) )
-		bar_list.append( Objects.Bar(numpy.array([1700, 385]), numpy.array([1800,430])) )
-		bar_list.append( Objects.Bar(numpy.array([1800, 430]), numpy.array([3000,430])) )
+		bar_list.append( Objects.Bar(numpy.array([2500, 185]), numpy.array([2600,130])) )
+		bar_list.append( Objects.Bar(numpy.array([2600, 130]), numpy.array([3500,130])) )
 		
 		self.point_list = point_list
 
@@ -50,13 +50,13 @@ class Objects:
 		for bar  in self.bar_list:
 			x, y, n = self._get_bar(bar, Cx, Cy, distance_threshold)
 			if x is not None:
-				object_list.append([y, n]) 		
+				object_list.append([y, n, None]) 		
 
 		if(not object_list):
 			for point in self.point_list:
 				x, n = self._get_point(point, Cx, Cy, distance_threshold)
 				if x is not None:
-					object_list.append([x, n])
+					object_list.append([x, n, None])
 
 		return object_list
 

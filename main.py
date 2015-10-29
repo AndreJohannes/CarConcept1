@@ -12,7 +12,6 @@ clock = pygame.time.Clock()
 
 screen = pygame.display.set_mode(size)
 engine = gameengine.GameEngine(pygame)
-
 state, displacement = engine.get_initial_state()
 
 start = time.time(); i=0
@@ -37,6 +36,6 @@ while 1:
     	if(time.time()-start > 1):
     		fps = i / (time.time()-start)
     		step_size = 7.2 / fps
-    		print "FPS: ", fps
+    		print "FPS: ", int(fps)
     		start=time.time()
     		i = 0
